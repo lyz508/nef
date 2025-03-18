@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (s *Server) getCallbackEndpoints() []Endpoint {
-	return []Endpoint{
+func (s *Server) getCallbackRoutes() []Route {
+	return []Route{
 		{
 			Method:  http.MethodPost,
 			Pattern: "/notification/smf",

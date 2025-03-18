@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (s *Server) getPFDManagementEndpoints() []Endpoint {
-	return []Endpoint{
+func (s *Server) getPFDManagementRoutes() []Route {
+	return []Route{
 		{
 			Method:  http.MethodGet,
 			Pattern: "/:scsAsID/transactions",

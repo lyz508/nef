@@ -21,29 +21,6 @@ const (
 	CorsConfigMaxAge = 86400
 )
 
-type Endpoint struct {
-	Method  string
-	Pattern string
-	APIFunc gin.HandlerFunc
-}
-
-func applyEndpoints(group *gin.RouterGroup, endpoints []Endpoint) {
-	for _, endpoint := range endpoints {
-		switch endpoint.Method {
-		case "GET":
-			group.GET(endpoint.Pattern, endpoint.APIFunc)
-		case "POST":
-			group.POST(endpoint.Pattern, endpoint.APIFunc)
-		case "PUT":
-			group.PUT(endpoint.Pattern, endpoint.APIFunc)
-		case "PATCH":
-			group.PATCH(endpoint.Pattern, endpoint.APIFunc)
-		case "DELETE":
-			group.DELETE(endpoint.Pattern, endpoint.APIFunc)
-		}
-	}
-}
-
 type nef interface {
 	Context() *nef_context.NefContext
 	Config() *factory.Config
@@ -64,25 +41,25 @@ func NewServer(nef nef, tlsKeyLogPath string) (*Server, error) {
 
 	s.router = logger_util.NewGinWithLogrus(logger.GinLog)
 
-	endpoints := s.getTrafficInfluenceEndpoints()
+	endpoints := s.getTrafficInfluenceRoutes()
 	group := s.router.Group(factory.TraffInfluResUriPrefix)
-	applyEndpoints(group, endpoints)
+	applyRoutes(group, endpoints)
 
-	endpoints = s.getPFDManagementEndpoints()
+	endpoints = s.getPFDManagementRoutes()
 	group = s.router.Group(factory.PfdMngResUriPrefix)
-	applyEndpoints(group, endpoints)
+	applyRoutes(group, endpoints)
 
-	endpoints = s.getPFDFEndpoints()
+	endpoints = s.getPFDFRoutes()
 	group = s.router.Group(factory.NefPfdMngResUriPrefix)
-	applyEndpoints(group, endpoints)
+	applyRoutes(group, endpoints)
 
-	endpoints = s.getOamEndpoints()
+	endpoints = s.getOamRoutes()
 	group = s.router.Group(factory.NefOamResUriPrefix)
-	applyEndpoints(group, endpoints)
+	applyRoutes(group, endpoints)
 
-	endpoints = s.getCallbackEndpoints()
+	endpoints = s.getCallbackRoutes()
 	group = s.router.Group(factory.NefCallbackResUriPrefix)
-	applyEndpoints(group, endpoints)
+	applyRoutes(group, endpoints)
 
 	s.router.Use(cors.New(cors.Config{
 		AllowMethods: []string{"GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"},
