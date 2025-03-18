@@ -17,6 +17,5 @@ func (s *Server) getOamRoutes() []Route {
 }
 
 func (s *Server) apiGetOamIndex(gc *gin.Context) {
-	hdlRsp := s.Processor().GetOamIndex()
-	s.buildAndSendHttpResponse(gc, hdlRsp, false)
+	s.Processor().GetOamIndex(gc)
 }
