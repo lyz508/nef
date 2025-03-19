@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"runtime/debug"
+	"sync"
+	"syscall"
+	"time"
 
 	"github.com/free5gc/nef/internal/logger"
 	nefapp "github.com/free5gc/nef/pkg/app"
@@ -50,12 +55,26 @@ func action(cliCtx *cli.Context) error {
 
 	logger.MainLog.Infoln("NEF version: ", version.GetVersion())
 
+	ctx, cancel := context.WithCancel(context.Background())
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		<-sigCh
+
+		logger.MainLog.Warnln("Terminating... (Wait 2s for other NFs to deregister)")
+		time.Sleep(2 * time.Second)
+		cancel()
+	}()
+
 	cfg, err := factory.ReadConfig(cliCtx.String("config"))
 	if err != nil {
 		return err
 	}
 
-	nef, err := nefapp.NewApp(cfg, tlsKeyLogPath)
+	nef, err := nefapp.NewApp(ctx, cfg, tlsKeyLogPath)
 	if err != nil {
 		return fmt.Errorf("New NEF err: %+v", err)
 	}

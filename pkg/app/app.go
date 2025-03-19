@@ -4,10 +4,8 @@ import (
 	"context"
 	"io"
 	"os"
-	"os/signal"
 	"runtime/debug"
 	"sync"
-	"syscall"
 
 	nef_context "github.com/free5gc/nef/internal/context"
 	"github.com/free5gc/nef/internal/logger"
@@ -21,6 +19,7 @@ import (
 
 type NefApp struct {
 	ctx       context.Context
+	cancel    context.CancelFunc
 	wg        sync.WaitGroup
 	cfg       *factory.Config
 	nefCtx    *nef_context.NefContext
@@ -30,13 +29,21 @@ type NefApp struct {
 	sbiServer *sbi.Server
 }
 
-func NewApp(cfg *factory.Config, tlsKeyLogPath string) (*NefApp, error) {
+func NewApp(
+	ctx context.Context,
+	cfg *factory.Config,
+	tlsKeyLogPath string,
+) (*NefApp, error) {
 	var err error
-	nef := &NefApp{cfg: cfg}
+	nef := &NefApp{
+		cfg: cfg,
+		wg:  sync.WaitGroup{},
+	}
 	nef.SetLogEnable(cfg.GetLogEnable())
 	nef.SetLogLevel(cfg.GetLogLevel())
 	nef.SetReportCaller(cfg.GetLogReportCaller())
 
+	nef.ctx, nef.cancel = context.WithCancel(ctx)
 	if nef.nefCtx, err = nef_context.NewContext(nef); err != nil {
 		return nil, err
 	}
@@ -61,6 +68,10 @@ func (a *NefApp) Config() *factory.Config {
 
 func (a *NefApp) Context() *nef_context.NefContext {
 	return a.nefCtx
+}
+
+func (a *NefApp) CancelContext() context.Context {
+	return a.ctx
 }
 
 func (a *NefApp) Consumer() *consumer.Consumer {
@@ -122,10 +133,6 @@ func (a *NefApp) SetReportCaller(reportCaller bool) {
 }
 
 func (a *NefApp) Run() error {
-	var cancel context.CancelFunc
-	a.ctx, cancel = context.WithCancel(context.Background())
-	defer cancel()
-
 	a.wg.Add(1)
 	/* Go Routine is spawned here for listening for cancellation event on
 	 * context */
@@ -135,21 +142,11 @@ func (a *NefApp) Run() error {
 		return err
 	}
 
-	if err := a.consumer.RegisterNFInstance(); err != nil {
+	if err := a.consumer.RegisterNFInstance(a.ctx); err != nil {
 		return err
 	}
 
-	// Wait for interrupt signal to gracefully shutdown UPF
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
-	<-sigCh
-
-	// Receive the interrupt signal
-	logger.MainLog.Infof("Shutdown NEF ...")
-	// Notify each goroutine and wait them stopped
-	cancel()
 	a.WaitRoutineStopped()
-	logger.MainLog.Infof("NEF exited")
 	return nil
 }
 
@@ -164,7 +161,9 @@ func (a *NefApp) listenShutdownEvent() {
 	}()
 
 	<-a.ctx.Done()
-	a.sbiServer.Stop()
+	if a.sbiServer != nil {
+		a.sbiServer.Stop()
+	}
 }
 
 func (a *NefApp) WaitRoutineStopped() {
