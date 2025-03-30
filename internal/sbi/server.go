@@ -9,6 +9,7 @@ import (
 	nef_context "github.com/free5gc/nef/internal/context"
 	"github.com/free5gc/nef/internal/logger"
 	"github.com/free5gc/nef/internal/sbi/processor"
+	"github.com/free5gc/nef/pkg/app"
 	"github.com/free5gc/nef/pkg/factory"
 	"github.com/free5gc/openapi"
 	"github.com/free5gc/util/httpwrapper"
@@ -22,6 +23,7 @@ const (
 )
 
 type nef interface {
+	app.App
 	Context() *nef_context.NefContext
 	Config() *factory.Config
 	Processor() *processor.Processor
@@ -105,6 +107,7 @@ func (s *Server) startServer(wg *sync.WaitGroup) {
 		if p := recover(); p != nil {
 			// Print stack for panic to log. Fatalf() will let program exit.
 			logger.SBILog.Fatalf("panic: %v\n%s", p, string(debug.Stack()))
+			s.Terminate()
 		}
 
 		wg.Done()
@@ -123,7 +126,7 @@ func (s *Server) startServer(wg *sync.WaitGroup) {
 			cfg.GetCertPemPath(),
 			cfg.GetCertKeyPath())
 	} else {
-		err = fmt.Errorf("No support this scheme[%s]", scheme)
+		err = fmt.Errorf("no support this scheme[%s]", scheme)
 	}
 
 	if err != nil && err != http.ErrServerClosed {
