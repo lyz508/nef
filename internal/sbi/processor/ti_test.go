@@ -438,9 +438,7 @@ func TestDeleteIndividualTrafficInfluenceSubscription(t *testing.T) {
 			nefApp.Processor().DeleteIndividualTrafficInfluenceSubscription(c, tc.afID, tc.subID)
 			require.Equal(t, tc.expectedResponse.Status, httpRecorder.Code)
 
-			if tc.expectedResponse.Body != nil {
-				assertJSONBodyEqual(t, tc.expectedResponse.Body, httpRecorder.Body.Bytes())
-			}
+			assertJSONBodyEqual(t, tc.expectedResponse.Body, httpRecorder.Body.Bytes())
 		})
 	}
 	nefCtx.DeleteAf(af1.AfID)
@@ -708,6 +706,11 @@ func initPCFPaDeleteAppSessionsStub(statusCode int) {
 
 func assertJSONBodyEqual(t *testing.T, expectedBody interface{}, actualBody []byte) {
 	t.Helper()
+
+	if expectedBody == nil {
+		require.Empty(t, len(actualBody))
+		return
+	}
 
 	expectedJSON, _ := json.Marshal(expectedBody)
 

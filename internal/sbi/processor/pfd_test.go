@@ -271,9 +271,7 @@ func TestDeletePFDManagementTransactions(t *testing.T) {
 			nefApp.Processor().DeletePFDManagementTransactions(c, tc.afID)
 			require.Equal(t, tc.expectedResponse.Status, httpRecorder.Code)
 
-			if tc.expectedResponse.Body != nil {
-				assertJSONBodyEqual(t, tc.expectedResponse.Body, httpRecorder.Body.Bytes())
-			}
+			assertJSONBodyEqual(t, tc.expectedResponse.Body, httpRecorder.Body.Bytes())
 		})
 	}
 }
@@ -507,9 +505,7 @@ func TestDeleteIndividualPFDManagementTransaction(t *testing.T) {
 			nefApp.Processor().DeleteIndividualPFDManagementTransaction(c, tc.afID, tc.transID)
 			require.Equal(t, tc.expectedResponse.Status, httpRecorder.Code)
 
-			if tc.expectedResponse.Body != nil {
-				assertJSONBodyEqual(t, tc.expectedResponse.Body, httpRecorder.Body.Bytes())
-			}
+			assertJSONBodyEqual(t, tc.expectedResponse.Body, httpRecorder.Body.Bytes())
 		})
 	}
 }
@@ -746,9 +742,7 @@ func TestDeleteIndividualApplicationPFDManagement(t *testing.T) {
 			nefApp.Processor().DeleteIndividualApplicationPFDManagement(c, tc.afID, tc.transID, tc.appID)
 			require.Equal(t, tc.expectedResponse.Status, httpRecorder.Code)
 
-			if tc.expectedResponse.Body != nil {
-				assertJSONBodyEqual(t, tc.expectedResponse.Body, httpRecorder.Body.Bytes())
-			}
+			assertJSONBodyEqual(t, tc.expectedResponse.Body, httpRecorder.Body.Bytes())
 		})
 	}
 }
@@ -844,9 +838,7 @@ func TestPutIndividualApplicationPFDManagement(t *testing.T) {
 			nefApp.Processor().PutIndividualApplicationPFDManagement(c, tc.afID, tc.transID, tc.appID, tc.pfdData)
 			require.Equal(t, tc.expectedResponse.Status, httpRecorder.Code)
 
-			if tc.expectedResponse.Body != nil {
-				assertJSONBodyEqual(t, tc.expectedResponse.Body, httpRecorder.Body.Bytes())
-			}
+			assertJSONBodyEqual(t, tc.expectedResponse.Body, httpRecorder.Body.Bytes())
 		})
 	}
 }
@@ -945,9 +937,7 @@ func TestPatchIndividualApplicationPFDManagement(t *testing.T) {
 				c, tc.afID, tc.transID, tc.appID, tc.pfdData)
 			require.Equal(t, tc.expectedResponse.Status, httpRecorder.Code)
 
-			if tc.expectedResponse.Body != nil {
-				assertJSONBodyEqual(t, tc.expectedResponse.Body, httpRecorder.Body.Bytes())
-			}
+			assertJSONBodyEqual(t, tc.expectedResponse.Body, httpRecorder.Body.Bytes())
 		})
 	}
 }
