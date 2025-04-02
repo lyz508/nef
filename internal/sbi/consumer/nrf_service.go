@@ -142,7 +142,7 @@ func (s *nnrfService) RegisterNFInstance(ctx context.Context) error {
 			if status == http.StatusOK {
 				// NFUpdate
 				logger.ConsumerLog.Infof("NFRegister Update")
-				break
+				return nil
 			} else if status == http.StatusCreated {
 				// NFRegister
 				resourceUri := rsp.Header.Get("Location")
@@ -163,13 +163,12 @@ func (s *nnrfService) RegisterNFInstance(ctx context.Context) error {
 				}
 
 				logger.ConsumerLog.Infof("NFRegister Created")
-				break
+				return nil
 			} else {
 				logger.ConsumerLog.Infof("NRF return wrong status: %d", status)
 			}
 		}
 	}
-	return nil
 }
 
 func (s *nnrfService) buildNfProfile() (*models.NfProfile, error) {

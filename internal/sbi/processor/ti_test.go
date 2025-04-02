@@ -361,7 +361,14 @@ func TestPostTrafficInfluenceSubscription(t *testing.T) {
 
 			if tc.expectedResponse.Headers != nil {
 				for k, v := range tc.expectedResponse.Headers {
-					require.ElementsMatch(t, v, httpRecorder.Result().Header.Values(k))
+					resp := httpRecorder.Result()
+					defer func() {
+						if err := resp.Body.Close(); err != nil {
+							t.Errorf("failed to close resp body: %v", err)
+						}
+					}()
+
+					require.ElementsMatch(t, v, resp.Header.Values(k))
 				}
 			}
 
@@ -712,7 +719,8 @@ func assertJSONBodyEqual(t *testing.T, expectedBody interface{}, actualBody []by
 		return
 	}
 
-	expectedJSON, _ := json.Marshal(expectedBody)
+	expectedJSON, err := json.Marshal(expectedBody)
+	require.NoError(t, err)
 
 	var expectedData, actualData interface{}
 	require.NoError(t, json.Unmarshal(expectedJSON, &expectedData))
