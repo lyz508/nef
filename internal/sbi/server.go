@@ -74,8 +74,7 @@ func NewServer(nef nef, tlsKeyLogPath string) (*Server, error) {
 		MaxAge:           CorsConfigMaxAge,
 	}))
 
-	cfg := s.Config()
-	bindAddr := cfg.SbiBindingAddr()
+	bindAddr := s.Config().SbiBindingAddr()
 	logger.SBILog.Infof("Binding addr: [%s]", bindAddr)
 	var err error
 	if s.httpServer, err = httpwrapper.NewHttp2Server(bindAddr, tlsKeyLogPath, s.router); err != nil {
