@@ -218,7 +218,6 @@ func (s *nnrfService) DeregisterNFInstance() (problemDetails *models.ProblemDeta
 func (s *nnrfService) SearchNFInstances(
 	nrfUri string,
 	srvName models.ServiceName,
-	targetNfType, requestNfType models.NrfNfManagementNfType,
 	param *NFDiscovery.SearchNFInstancesRequest,
 ) (*models.NrfNfDiscoveryNfProfile, string, error) {
 	nefContext := s.consumer.Context()
