@@ -8,11 +8,11 @@ import (
 	"github.com/free5gc/nef/pkg/app"
 	"github.com/free5gc/nef/pkg/factory"
 	"github.com/free5gc/openapi"
-	"github.com/free5gc/openapi/Nnrf_NFDiscovery"
-	"github.com/free5gc/openapi/Nnrf_NFManagement"
-	"github.com/free5gc/openapi/Npcf_PolicyAuthorization"
-	"github.com/free5gc/openapi/Nudr_DataRepository"
 	"github.com/free5gc/openapi/models"
+	"github.com/free5gc/openapi/nrf/NFDiscovery"
+	"github.com/free5gc/openapi/nrf/NFManagement"
+	"github.com/free5gc/openapi/pcf/PolicyAuthorization"
+	"github.com/free5gc/openapi/udr/DataRepository"
 )
 
 type nef interface {
@@ -38,18 +38,18 @@ func NewConsumer(nef nef) (*Consumer, error) {
 
 	c.nnrfService = &nnrfService{
 		consumer:        c,
-		nfDiscClients:   make(map[string]*Nnrf_NFDiscovery.APIClient),
-		nfMngmntClients: make(map[string]*Nnrf_NFManagement.APIClient),
+		nfDiscClients:   make(map[string]*NFDiscovery.APIClient),
+		nfMngmntClients: make(map[string]*NFManagement.APIClient),
 	}
 
 	c.npcfService = &npcfService{
 		consumer: c,
-		clients:  make(map[string]*Npcf_PolicyAuthorization.APIClient),
+		clients:  make(map[string]*PolicyAuthorization.APIClient),
 	}
 
 	c.nudrService = &nudrService{
 		consumer: c,
-		clients:  make(map[string]*Nudr_DataRepository.APIClient),
+		clients:  make(map[string]*DataRepository.APIClient),
 	}
 	return c, nil
 }
