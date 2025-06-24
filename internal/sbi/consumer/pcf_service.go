@@ -278,14 +278,3 @@ func (s *npcfService) DeleteAppSession(appSessionId string) (int, interface{}) {
 
 	return rspCode, rspBody
 }
-
-// func getAppSessIDFromRspLocationHeader(rsp *http.Response) string {
-// 	appSessID := ""
-// 	loc := rsp.Header.Get("Location")
-// 	if strings.Contains(loc, "http") {
-// 		index := strings.LastIndex(loc, "/")
-// 		appSessID = loc[index+1:]
-// 	}
-// 	logger.ConsumerLog.Infof("appSessID=%q", appSessID)
-// 	return appSessID
-// }
