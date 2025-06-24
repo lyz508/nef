@@ -2,10 +2,12 @@ package consumer
 
 import (
 	"net/http"
+	"reflect"
 	"sync"
 
 	// "github.com/free5gc/openapi/Nudr_DataRepository"
 	"github.com/free5gc/openapi/models"
+	"github.com/free5gc/openapi/nrf/NFDiscovery"
 	"github.com/free5gc/openapi/udr/DataRepository"
 )
 
@@ -37,8 +39,9 @@ func (s *nudrService) getClient(uri string) *DataRepository.APIClient {
 func (s *nudrService) getUdrDrUri() (string, error) {
 	uri := s.consumer.Context().UdrDrUri()
 	if uri == "" {
+		localVarOptionals := NFDiscovery.SearchNFInstancesRequest{}
 		_, sUri, err := s.consumer.SearchNFInstances(s.consumer.Config().NrfUri(),
-			models.ServiceName_NUDR_DR, nil)
+			models.ServiceName_NUDR_DR, models.NrfNfManagementNfType_UDR, models.NrfNfManagementNfType_NEF, &localVarOptionals)
 		if err == nil {
 			s.consumer.Context().SetUdrDrUri(sUri)
 		}
@@ -140,15 +143,20 @@ func (s *nudrService) AppDataInfluenceDataPut(influenceID string,
 		InfluenceId:      &influenceID,
 		TrafficInfluData: tiData,
 	}
+
 	result, err = client.IndividualInfluenceDataDocumentApi.CreateOrReplaceIndividualInfluenceData(ctx, putInfluenceDataReq)
 
-	if result != nil {
-		rspCode = http.StatusOK
-		rspBody = result.TrafficInfluData
-	} else {
+	if err != nil {
 		rspCode, rspBody = handleAPIServiceNoResponse(err)
-	}
+	} else {
+		if result.Location != "" {
+			return http.StatusCreated, result.TrafficInfluData
+		}
 
+		if reflect.DeepEqual(result.TrafficInfluData, models.TrafficInfluData{}) {
+			return http.StatusOK, result.TrafficInfluData
+		}
+	}
 	return rspCode, rspBody
 }
 

@@ -78,6 +78,7 @@ func (p *Processor) PostTrafficInfluenceSubscription(
 		rspStatus, rspBody, appSessID := p.Consumer().PostAppSessions(asc)
 		if rspStatus != http.StatusCreated {
 			c.JSON(rspStatus, rspBody)
+			return
 		}
 		afSub.AppSessID = appSessID
 	} else if len(tiSub.ExternalGroupId) > 0 || tiSub.AnyUeInd {
@@ -114,6 +115,7 @@ func (p *Processor) PostTrafficInfluenceSubscription(
 			c.Header(hdrName, hdrValue)
 		}
 	}
+	af.Log.Infoln("Convert TI 3")
 	c.JSON(http.StatusCreated, tiSub)
 }
 
