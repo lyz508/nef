@@ -2,7 +2,7 @@ package consumer
 
 import (
 	"net/http"
-	"strings"
+	"reflect"
 	"sync"
 
 	"github.com/free5gc/nef/internal/logger"
@@ -112,10 +112,14 @@ func (s *npcfService) PostAppSessions(asc *models.AppSessionContext) (int, inter
 	rsp, err = client.ApplicationSessionsCollectionApi.PostAppSessions(ctx, req)
 
 	if rsp != nil {
-		rspCode = http.StatusCreated
-		rspBody = rsp.AppSessionContext
-		appSessID = rsp.Location
-		logger.ConsumerLog.Debugf("PostAppSessions RspData: %+v", rsp.AppSessionContext)
+		if reflect.DeepEqual(rsp.AppSessionContext, models.AppSessionContext{}) {
+			rspCode = http.StatusSeeOther
+		} else {
+			rspCode = http.StatusCreated
+			rspBody = rsp.AppSessionContext
+			appSessID = rsp.Location
+			logger.ConsumerLog.Debugf("PostAppSessions RspData: %+v", rsp.AppSessionContext)
+		}
 	} else {
 		rspCode, rspBody = handleAPIServiceNoResponse(err)
 	}
@@ -129,23 +133,22 @@ func (s *npcfService) PutAppSession(
 	asc *models.AppSessionContext,
 ) (int, interface{}, string) {
 	var (
-		err       error
-		rspCode   int
-		rspBody   interface{}
-		appSessID string
-		rsp       *PolicyAuthorization.GetAppSessionResponse
-		modRsp    *PolicyAuthorization.ModAppSessionResponse
+		err     error
+		rspCode int
+		rspBody interface{}
+		rsp     *PolicyAuthorization.GetAppSessionResponse
+		modRsp  *PolicyAuthorization.ModAppSessionResponse
 	)
 
 	uri, err := s.getPcfPolicyAuthUri()
 	if err != nil {
-		return rspCode, rspBody, appSessID
+		return rspCode, rspBody, appSessionId
 	}
 	client := s.getClient(uri)
 
 	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NPCF_POLICYAUTHORIZATION, models.NrfNfManagementNfType_PCF)
 	if err != nil {
-		return rspCode, rspBody, appSessID
+		return rspCode, rspBody, appSessionId
 	}
 
 	appSessReq := &PolicyAuthorization.GetAppSessionRequest{
@@ -158,7 +161,7 @@ func (s *npcfService) PutAppSession(
 		rspCode = http.StatusOK
 
 		appSessModReq := &PolicyAuthorization.ModAppSessionRequest{
-			AppSessionId: &appSessID,
+			AppSessionId: &appSessionId,
 			AppSessionContextUpdateDataPatch: &models.AppSessionContextUpdateDataPatch{
 				AscReqData: ascUpdateData,
 			},
@@ -166,7 +169,14 @@ func (s *npcfService) PutAppSession(
 		modRsp, err = client.IndividualApplicationSessionContextDocumentApi.ModAppSession(ctx, appSessModReq)
 
 		if modRsp != nil {
-			rspCode = http.StatusOK
+			if reflect.DeepEqual(modRsp.AppSessionContext, models.AppSessionContext{}) {
+				rspCode = http.StatusNoContent
+				rspBody = nil
+			} else {
+				rspCode = http.StatusOK
+				rspBody = modRsp.AppSessionContext
+				logger.ConsumerLog.Debugf("PostAppSessions RspData: %+v", rsp.AppSessionContext)
+			}
 		} else {
 			rspCode, rspBody = handleAPIServiceNoResponse(err)
 		}
@@ -175,7 +185,7 @@ func (s *npcfService) PutAppSession(
 		rspCode, rspBody = handleAPIServiceNoResponse(err)
 	}
 
-	return rspCode, rspBody, appSessID
+	return rspCode, rspBody, appSessionId
 }
 
 func (s *npcfService) PatchAppSession(appSessionId string,
@@ -248,23 +258,34 @@ func (s *npcfService) DeleteAppSession(appSessionId string) (int, interface{}) {
 	rsp, err = client.IndividualApplicationSessionContextDocumentApi.DeleteAppSession(
 		ctx, appSessDelReq)
 
+	if err != nil {
+		return handleAPIServiceNoResponse(err)
+	}
+
 	if rsp != nil {
-		rspCode = http.StatusNoContent
-		logger.ConsumerLog.Debugf("DeleteAppSessions RspData: %+v", rsp)
+		if !reflect.DeepEqual(rsp.AppSessionContext, models.AppSessionContext{}) {
+			rspCode = http.StatusOK
+			rspBody = rsp.AppSessionContext
+		} else {
+			rspCode = http.StatusNoContent
+			rspBody = nil
+		}
 	} else {
-		rspCode, rspBody = handleAPIServiceNoResponse(err)
+		// unexpected edge case: nil response and nil error
+		rspCode = http.StatusInternalServerError
+		rspBody = "unexpected nil response"
 	}
 
 	return rspCode, rspBody
 }
 
-func getAppSessIDFromRspLocationHeader(rsp *http.Response) string {
-	appSessID := ""
-	loc := rsp.Header.Get("Location")
-	if strings.Contains(loc, "http") {
-		index := strings.LastIndex(loc, "/")
-		appSessID = loc[index+1:]
-	}
-	logger.ConsumerLog.Infof("appSessID=%q", appSessID)
-	return appSessID
-}
+// func getAppSessIDFromRspLocationHeader(rsp *http.Response) string {
+// 	appSessID := ""
+// 	loc := rsp.Header.Get("Location")
+// 	if strings.Contains(loc, "http") {
+// 		index := strings.LastIndex(loc, "/")
+// 		appSessID = loc[index+1:]
+// 	}
+// 	logger.ConsumerLog.Infof("appSessID=%q", appSessID)
+// 	return appSessID
+// }

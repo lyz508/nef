@@ -74,14 +74,15 @@ func (s *nudrService) AppDataInfluenceDataGet(influenceIDs []string) (int, inter
 	}
 	result, err = client.InfluenceDataStoreApi.ReadInfluenceData(ctx, readInfluenceDataReq)
 
-	if result != nil {
-		rspCode = http.StatusOK
-		rspBody = result.TrafficInfluData
-	} else {
-		rspCode, rspBody = handleAPIServiceNoResponse(err)
+	if err != nil {
+		return handleAPIServiceNoResponse(err)
 	}
 
-	return rspCode, rspBody
+	if result == nil || reflect.DeepEqual(result.TrafficInfluData, []models.TrafficInfluData{}) {
+		return http.StatusNoContent, nil
+	}
+
+	return http.StatusOK, result.TrafficInfluData
 }
 
 func (s *nudrService) AppDataInfluenceDataIdGet(influenceID string) (int, interface{}) {
@@ -146,17 +147,19 @@ func (s *nudrService) AppDataInfluenceDataPut(influenceID string,
 
 	result, err = client.IndividualInfluenceDataDocumentApi.CreateOrReplaceIndividualInfluenceData(ctx, putInfluenceDataReq)
 
-	if err != nil {
-		rspCode, rspBody = handleAPIServiceNoResponse(err)
-	} else {
+	if result != nil {
 		if result.Location != "" {
-			return http.StatusCreated, result.TrafficInfluData
+			rspCode = http.StatusCreated
+		} else if reflect.DeepEqual(result.TrafficInfluData, models.TrafficInfluData{}) {
+			rspCode = http.StatusNoContent
+		} else {
+			rspCode = http.StatusOK
 		}
-
-		if reflect.DeepEqual(result.TrafficInfluData, models.TrafficInfluData{}) {
-			return http.StatusOK, result.TrafficInfluData
-		}
+		rspBody = result.TrafficInfluData
+	} else {
+		rspCode, rspBody = handleAPIServiceNoResponse(err)
 	}
+
 	return rspCode, rspBody
 }
 
@@ -188,8 +191,13 @@ func (s *nudrService) AppDataInfluenceDataPatch(
 	result, err = client.IndividualInfluenceDataDocumentApi.UpdateIndividualInfluenceData(ctx, patchInfluenceDataReq)
 
 	if result != nil {
-		rspCode = http.StatusOK
-		rspBody = result.TrafficInfluData
+		if reflect.DeepEqual(result.TrafficInfluData, models.TrafficInfluData{}) {
+			rspCode = http.StatusNoContent
+			rspBody = nil
+		} else {
+			rspCode = http.StatusOK
+			rspBody = result.TrafficInfluData
+		}
 	} else {
 		rspCode, rspBody = handleAPIServiceNoResponse(err)
 	}
@@ -224,7 +232,7 @@ func (s *nudrService) AppDataInfluenceDataDelete(influenceID string) (int, inter
 
 	if result != nil {
 		rspCode = http.StatusNoContent
-		rspBody = result
+		rspBody = nil
 	} else {
 		rspCode, rspBody = handleAPIServiceNoResponse(err)
 	}
@@ -261,7 +269,6 @@ func (s *nudrService) AppDataPfdsGet(appIDs []string) (int, interface{}) {
 		rspCode = http.StatusOK
 		rspBody = result.PfdDataForAppExt
 	} else {
-		// API Service Internal Error or Server No Response
 		rspCode, rspBody = handleAPIServiceNoResponse(err)
 	}
 
@@ -295,10 +302,17 @@ func (s *nudrService) AppDataPfdsAppIdPut(appID string, pfdDataForApp *models.Pf
 	result, err = client.IndividualPFDDataDocumentApi.CreateOrReplaceIndividualPFDData(ctx, putPfdDataReq)
 
 	if result != nil {
-		rspCode = http.StatusOK
-		rspBody = result.PfdDataForAppExt
+		if reflect.DeepEqual(result.PfdDataForAppExt, models.PfdDataForAppExt{}) {
+			rspCode = http.StatusNoContent
+			rspBody = nil
+		} else if result.Location != "" {
+			rspCode = http.StatusCreated
+			rspBody = result.PfdDataForAppExt
+		} else {
+			rspCode = http.StatusOK
+			rspBody = result.PfdDataForAppExt
+		}
 	} else {
-		// API Service Internal Error or Server No Response
 		rspCode, rspBody = handleAPIServiceNoResponse(err)
 	}
 
@@ -332,6 +346,7 @@ func (s *nudrService) AppDataPfdsAppIdDelete(appID string) (int, interface{}) {
 
 	if result != nil {
 		rspCode = http.StatusNoContent
+		rspBody = nil
 	} else {
 		// API Service Internal Error or Server No Response
 		rspCode, rspBody = handleAPIServiceNoResponse(err)
