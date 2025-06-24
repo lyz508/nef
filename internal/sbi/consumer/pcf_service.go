@@ -7,6 +7,7 @@ import (
 
 	"github.com/free5gc/nef/internal/logger"
 	"github.com/free5gc/openapi/models"
+	"github.com/free5gc/openapi/nrf/NFDiscovery"
 	"github.com/free5gc/openapi/pcf/PolicyAuthorization"
 )
 
@@ -38,8 +39,10 @@ func (s *npcfService) getClient(uri string) *PolicyAuthorization.APIClient {
 func (s *npcfService) getPcfPolicyAuthUri() (string, error) {
 	uri := s.consumer.Context().PcfPaUri()
 	if uri == "" {
-		_, sUri, err := s.consumer.SearchNFInstances(s.consumer.Config().NrfUri(),
-			models.ServiceName_NPCF_POLICYAUTHORIZATION, nil)
+		localVarOptionals := NFDiscovery.SearchNFInstancesRequest{}
+		logger.ConsumerLog.Infoln(s.consumer.Config().NrfUri())
+		_, sUri, err := s.consumer.SearchNFInstances(s.consumer.Config().NrfUri(), models.ServiceName_NPCF_POLICYAUTHORIZATION,
+			models.NrfNfManagementNfType_PCF, models.NrfNfManagementNfType_NEF, &localVarOptionals)
 		if err == nil {
 			s.consumer.Context().SetPcfPaUri(sUri)
 		}

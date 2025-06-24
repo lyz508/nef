@@ -164,6 +164,8 @@ func (s *nnrfService) RegisterNFInstance(ctx context.Context, nefCtx *nef_contex
 func (s *nnrfService) buildNfProfile() (
 	profile *models.NrfNfManagementNfProfile, err error,
 ) {
+	profile = &models.NrfNfManagementNfProfile{}
+
 	profile.NfInstanceId = s.consumer.Context().NfInstID()
 	profile.NfType = models.NrfNfManagementNfType_NEF
 	profile.NfStatus = models.NrfNfManagementNfStatus_REGISTERED
@@ -174,7 +176,7 @@ func (s *nnrfService) buildNfProfile() (
 	if len(nfServices) == 0 {
 		return nil, fmt.Errorf("buildNfProfile err: NFServices is Empty")
 	}
-	profile.NfServices = &nfServices
+	profile.NfServices = nfServices
 	return profile, nil
 }
 
@@ -215,23 +217,23 @@ func (s *nnrfService) DeregisterNFInstance() (problemDetails *models.ProblemDeta
 	return problemDetails, err
 }
 
-func (s *nnrfService) SearchNFInstances(
-	nrfUri string,
-	srvName models.ServiceName,
-	param *NFDiscovery.SearchNFInstancesRequest,
+func (s *nnrfService) SearchNFInstances(nrfUri string, srvName models.ServiceName, targetNfType,
+	requestNfType models.NrfNfManagementNfType, param *NFDiscovery.SearchNFInstancesRequest,
 ) (*models.NrfNfDiscoveryNfProfile, string, error) {
 	nefContext := s.consumer.Context()
 	client := s.getNFDiscoveryClient(nefContext.NfInstID())
 
-	if client != nil {
+	if client == nil {
 		return nil, "", openapi.ReportError("nrf not found")
 	}
 
-	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NNRF_NFM, models.NrfNfManagementNfType_NEF)
+	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NNRF_DISC, models.NrfNfManagementNfType_NEF)
 	if err != nil {
 		return nil, "", err
 	}
 
+	param.TargetNfType = &targetNfType
+	param.RequesterNfType = &requestNfType
 	res, err := client.NFInstancesStoreApi.SearchNFInstances(ctx, param)
 	var result *models.SearchResult
 	if err != nil {
