@@ -3,6 +3,7 @@ package notifier
 import (
 	"context"
 	"errors"
+	"net/http"
 	"runtime/debug"
 	"strconv"
 	"sync"
@@ -44,6 +45,7 @@ func (n *PfdChangeNotifier) initPfdManagementApiClient() {
 	}
 
 	config := PFDmanagement.NewConfiguration()
+	config.SetHTTPClient(http.DefaultClient)
 	n.clientPfdManagement = PFDmanagement.NewAPIClient(config)
 }
 
@@ -128,13 +130,13 @@ func (nc *PfdNotifyContext) FlushNotifications() {
 				}
 			}()
 
-			notifyReq := &PFDmanagement.NnefPFDmanagementNotifyRequest {
+			notifyReq := &PFDmanagement.NnefPFDmanagementNotifyRequest{
 				PfdChangeNotification: pfdChangeNotifications,
 			}
 
 			_, err := nc.notifier.clientPfdManagement.PFDSubscriptionsApi.NnefPFDmanagementNotify(
 				context.TODO(), nc.notifier.getSubURI(id), notifyReq)
-			
+
 			if err != nil {
 				logger.PFDManageLog.Fatal(err)
 			}
