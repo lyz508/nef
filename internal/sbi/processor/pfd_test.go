@@ -1344,7 +1344,6 @@ func initNRFDiscPCFStub() {
 
 	gock.New("http://127.0.0.10:8000/nnrf-disc/v1").
 		Get("/nf-instances").
-		// Get("/nnrf-disc/v1/nf-instances").
 		MatchParam("target-nf-type", "PCF").
 		MatchParam("requester-nf-type", "NEF").
 		MatchParam("service-names", "npcf-policyauthorization").

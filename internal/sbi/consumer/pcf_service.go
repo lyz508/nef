@@ -26,6 +26,7 @@ func (s *npcfService) getClient(uri string) *PolicyAuthorization.APIClient {
 	} else {
 		configuration := PolicyAuthorization.NewConfiguration()
 		configuration.SetBasePath(uri)
+		configuration.SetHTTPClient(http.DefaultClient)
 		cli := PolicyAuthorization.NewAPIClient(configuration)
 
 		s.mu.RUnlock()
@@ -39,13 +40,18 @@ func (s *npcfService) getClient(uri string) *PolicyAuthorization.APIClient {
 func (s *npcfService) getPcfPolicyAuthUri() (string, error) {
 	uri := s.consumer.Context().PcfPaUri()
 	if uri == "" {
-		localVarOptionals := NFDiscovery.SearchNFInstancesRequest{}
+		localVarOptionals := NFDiscovery.SearchNFInstancesRequest{
+			ServiceNames: []models.ServiceName{
+				models.ServiceName_NPCF_POLICYAUTHORIZATION,
+			},
+		}
 		logger.ConsumerLog.Infoln(s.consumer.Config().NrfUri())
 		_, sUri, err := s.consumer.SearchNFInstances(s.consumer.Config().NrfUri(), models.ServiceName_NPCF_POLICYAUTHORIZATION,
 			models.NrfNfManagementNfType_PCF, models.NrfNfManagementNfType_NEF, &localVarOptionals)
 		if err == nil {
 			s.consumer.Context().SetPcfPaUri(sUri)
 		}
+		logger.ConsumerLog.Debugf("Search NF Instances failed")
 		return sUri, err
 	}
 	return uri, nil

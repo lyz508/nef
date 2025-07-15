@@ -26,6 +26,7 @@ func (s *nudrService) getClient(uri string) *DataRepository.APIClient {
 	} else {
 		configuration := DataRepository.NewConfiguration()
 		configuration.SetBasePath(uri)
+		configuration.SetHTTPClient(http.DefaultClient)
 		cli := DataRepository.NewAPIClient(configuration)
 
 		s.mu.RUnlock()
@@ -39,7 +40,11 @@ func (s *nudrService) getClient(uri string) *DataRepository.APIClient {
 func (s *nudrService) getUdrDrUri() (string, error) {
 	uri := s.consumer.Context().UdrDrUri()
 	if uri == "" {
-		localVarOptionals := NFDiscovery.SearchNFInstancesRequest{}
+		localVarOptionals := NFDiscovery.SearchNFInstancesRequest{
+			ServiceNames: []models.ServiceName{
+				models.ServiceName_NUDR_DR,
+			},
+		}
 		_, sUri, err := s.consumer.SearchNFInstances(s.consumer.Config().NrfUri(),
 			models.ServiceName_NUDR_DR, models.NrfNfManagementNfType_UDR, models.NrfNfManagementNfType_NEF, &localVarOptionals)
 		if err == nil {
