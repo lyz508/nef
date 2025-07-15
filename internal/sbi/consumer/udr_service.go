@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	// "github.com/free5gc/openapi/Nudr_DataRepository"
+	"github.com/free5gc/openapi"
 	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/openapi/nrf/NFDiscovery"
 	"github.com/free5gc/openapi/udr/DataRepository"
@@ -270,13 +271,23 @@ func (s *nudrService) AppDataPfdsGet(appIDs []string) (int, interface{}) {
 	}
 	result, err = client.PFDDataStoreApi.ReadPFDData(ctx, readPfdDataReq)
 
-	if result != nil {
+	if err == nil && result != nil {
 		rspCode = http.StatusOK
-		rspBody = result.PfdDataForAppExt
-	} else {
-		rspCode, rspBody = handleAPIServiceNoResponse(err)
+		rspBody = &result.PfdDataForAppExt
+		return rspCode, rspBody
 	}
 
+	if err != nil {
+		if apiErr, ok := err.(openapi.GenericOpenAPIError); ok {
+			if pd, ok := apiErr.ErrorModel.(DataRepository.ReadPFDDataError); ok {
+				rspCode = int(pd.ProblemDetails.Status)
+				rspBody = &pd.ProblemDetails
+				return rspCode, rspBody
+			}
+		}
+	}
+
+	rspCode, rspBody = handleAPIServiceNoResponse(err)
 	return rspCode, rspBody
 }
 
@@ -312,10 +323,10 @@ func (s *nudrService) AppDataPfdsAppIdPut(appID string, pfdDataForApp *models.Pf
 			rspBody = nil
 		} else if result.Location != "" {
 			rspCode = http.StatusCreated
-			rspBody = result.PfdDataForAppExt
+			rspBody = &result.PfdDataForAppExt
 		} else {
 			rspCode = http.StatusOK
-			rspBody = result.PfdDataForAppExt
+			rspBody = &result.PfdDataForAppExt
 		}
 	} else {
 		rspCode, rspBody = handleAPIServiceNoResponse(err)
@@ -385,13 +396,22 @@ func (s *nudrService) AppDataPfdsAppIdGet(appID string) (int, interface{}) {
 	}
 	result, err = client.IndividualPFDDataDocumentApi.ReadIndividualPFDData(ctx, readPfdDataReq)
 
-	if result != nil {
+	if err == nil && result != nil {
 		rspCode = http.StatusOK
-		rspBody = result.PfdDataForAppExt
-	} else {
-		// API Service Internal Error or Server No Response
-		rspCode, rspBody = handleAPIServiceNoResponse(err)
+		rspBody = &result.PfdDataForAppExt
+		return rspCode, rspBody
 	}
 
+	if err != nil {
+		if apiErr, ok := err.(openapi.GenericOpenAPIError); ok {
+			if pd, ok := apiErr.ErrorModel.(DataRepository.ReadIndividualPFDDataError); ok {
+				rspCode = int(pd.ProblemDetails.Status)
+				rspBody = &pd.ProblemDetails
+				return rspCode, rspBody
+			}
+		}
+	}
+
+	rspCode, rspBody = handleAPIServiceNoResponse(err)
 	return rspCode, rspBody
 }
