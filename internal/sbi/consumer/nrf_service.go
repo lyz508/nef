@@ -3,6 +3,7 @@ package consumer
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -79,6 +80,7 @@ func (s *nnrfService) getNFDiscoveryClient(uri string) *NFDiscovery.APIClient {
 	} else {
 		configuration := NFDiscovery.NewConfiguration()
 		configuration.SetBasePath(uri)
+		configuration.SetHTTPClient(http.DefaultClient)
 		cli := NFDiscovery.NewAPIClient(configuration)
 
 		s.nfDiscMu.RUnlock()
@@ -220,14 +222,13 @@ func (s *nnrfService) DeregisterNFInstance() (problemDetails *models.ProblemDeta
 func (s *nnrfService) SearchNFInstances(nrfUri string, srvName models.ServiceName, targetNfType,
 	requestNfType models.NrfNfManagementNfType, param *NFDiscovery.SearchNFInstancesRequest,
 ) (*models.NrfNfDiscoveryNfProfile, string, error) {
-	nefContext := s.consumer.Context()
-	client := s.getNFDiscoveryClient(nefContext.NfInstID())
+	client := s.getNFDiscoveryClient(nrfUri)
 
 	if client == nil {
 		return nil, "", openapi.ReportError("nrf not found")
 	}
 
-	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NNRF_DISC, models.NrfNfManagementNfType_NEF)
+	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NNRF_DISC, models.NrfNfManagementNfType_NRF)
 	if err != nil {
 		return nil, "", err
 	}
