@@ -71,7 +71,7 @@ func (n *PfdChangeNotifier) DeletePfdSub(subID string) error {
 	defer n.mu.Unlock()
 
 	if _, exist := n.subIdToURI[subID]; !exist {
-		return errors.New("Subscription not found")
+		return errors.New("subscription not found")
 	}
 	delete(n.subIdToURI, subID)
 	for _, subIDs := range n.appIdToSubIDs {
