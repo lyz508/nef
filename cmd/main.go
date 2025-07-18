@@ -59,7 +59,7 @@ func action(cliCtx *cli.Context) error {
 
 	nef, err := nefapp.NewApp(cfg, tlsKeyLogPath)
 	if err != nil {
-		return fmt.Errorf("New NEF err: %+v", err)
+		return fmt.Errorf("new NEF err: %+v", err)
 	}
 
 	if err := nef.Run(); err != nil {
