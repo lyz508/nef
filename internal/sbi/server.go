@@ -105,7 +105,7 @@ func (s *Server) startServer(wg *sync.WaitGroup) {
 		if p := recover(); p != nil {
 			// Print stack for panic to log. Fatalf() will let program exit.
 			logger.SBILog.Fatalf("panic: %v\n%s", p, string(debug.Stack()))
-			s.Terminate()
+			s.Stop()
 		}
 
 		wg.Done()
@@ -124,7 +124,7 @@ func (s *Server) startServer(wg *sync.WaitGroup) {
 			cfg.GetCertPemPath(),
 			cfg.GetCertKeyPath())
 	} else {
-		err = fmt.Errorf("no support this scheme[%s]", scheme)
+		err = fmt.Errorf("scheme [%s] is not supported", scheme)
 	}
 
 	if err != nil && err != http.ErrServerClosed {

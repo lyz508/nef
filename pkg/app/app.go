@@ -11,7 +11,7 @@ type App interface {
 	SetReportCaller(reportCaller bool)
 
 	Start() error
-	Terminate()
+	Stop()
 
 	Context() *nef_context.NefContext
 	Config() *factory.Config
