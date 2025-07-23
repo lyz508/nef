@@ -179,7 +179,7 @@ func (a *NefApp) terminateProcedure() {
 	logger.MainLog.Infof("Terminating NEF...")
 
 	if a.sbiServer != nil {
-		a.sbiServer.Stop()
+		a.sbiServer.Terminate()
 	}
 
 	// deregister with NRF

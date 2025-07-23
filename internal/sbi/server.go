@@ -91,7 +91,7 @@ func (s *Server) Run(wg *sync.WaitGroup) error {
 	return nil
 }
 
-func (s *Server) Stop() {
+func (s *Server) Terminate() {
 	if s.httpServer != nil {
 		logger.SBILog.Infof("Stop SBI server (listen on %s)", s.httpServer.Addr)
 		if err := s.httpServer.Close(); err != nil {
@@ -105,7 +105,7 @@ func (s *Server) startServer(wg *sync.WaitGroup) {
 		if p := recover(); p != nil {
 			// Print stack for panic to log. Fatalf() will let program exit.
 			logger.SBILog.Fatalf("panic: %v\n%s", p, string(debug.Stack()))
-			s.Stop()
+			s.Terminate()
 		}
 
 		wg.Done()
