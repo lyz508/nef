@@ -7,9 +7,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime/debug"
-	"sync"
 	"syscall"
-	"time"
 
 	"github.com/free5gc/nef/internal/logger"
 	"github.com/free5gc/nef/pkg/factory"
@@ -58,14 +56,9 @@ func action(cliCtx *cli.Context) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
-	wg := new(sync.WaitGroup)
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		<-sigCh
 
-		logger.MainLog.Warnln("Terminating... (Wait 2s for other NFs to deregister)")
-		time.Sleep(2 * time.Second)
+	go func() {
+		<-sigCh
 		cancel()
 	}()
 

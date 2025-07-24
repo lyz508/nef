@@ -74,8 +74,7 @@ func NewServer(nef nef, tlsKeyLogPath string) (*Server, error) {
 		MaxAge:           CorsConfigMaxAge,
 	}))
 
-	cfg := s.Config()
-	bindAddr := cfg.SbiBindingAddr()
+	bindAddr := s.Config().SbiBindingAddr()
 	logger.SBILog.Infof("Binding addr: [%s]", bindAddr)
 	var err error
 	if s.httpServer, err = httpwrapper.NewHttp2Server(bindAddr, tlsKeyLogPath, s.router); err != nil {
@@ -92,7 +91,7 @@ func (s *Server) Run(wg *sync.WaitGroup) error {
 	return nil
 }
 
-func (s *Server) Stop() {
+func (s *Server) Terminate() {
 	if s.httpServer != nil {
 		logger.SBILog.Infof("Stop SBI server (listen on %s)", s.httpServer.Addr)
 		if err := s.httpServer.Close(); err != nil {
@@ -125,7 +124,7 @@ func (s *Server) startServer(wg *sync.WaitGroup) {
 			cfg.GetCertPemPath(),
 			cfg.GetCertKeyPath())
 	} else {
-		err = fmt.Errorf("no support this scheme[%s]", scheme)
+		err = fmt.Errorf("scheme [%s] is not supported", scheme)
 	}
 
 	if err != nil && err != http.ErrServerClosed {
