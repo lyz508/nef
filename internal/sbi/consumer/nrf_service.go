@@ -122,7 +122,7 @@ func (s *nnrfService) RegisterNFInstance(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("context done.")
+			return fmt.Errorf("context done")
 		default:
 			nf, rsp, err = client.NFInstanceIDDocumentApi.RegisterNFInstance(
 				context.TODO(), s.consumer.Context().NfInstID(), *nfProfile)
@@ -139,11 +139,12 @@ func (s *nnrfService) RegisterNFInstance(ctx context.Context) error {
 			}
 
 			status := rsp.StatusCode
-			if status == http.StatusOK {
+			switch status {
+			case http.StatusOK:
 				// NFUpdate
 				logger.ConsumerLog.Infof("NFRegister Update")
 				return nil
-			} else if status == http.StatusCreated {
+			case http.StatusCreated:
 				// NFRegister
 				resourceUri := rsp.Header.Get("Location")
 				// resouceNrfUri := resourceUri[:strings.Index(resourceUri, "/nnrf-nfm/")]
@@ -164,7 +165,7 @@ func (s *nnrfService) RegisterNFInstance(ctx context.Context) error {
 
 				logger.ConsumerLog.Infof("NFRegister Created")
 				return nil
-			} else {
+			default:
 				logger.ConsumerLog.Infof("NRF return wrong status: %d", status)
 			}
 		}
