@@ -114,16 +114,15 @@ func (s *Server) startServer(wg *sync.WaitGroup) {
 	logger.SBILog.Infof("Start SBI server (listen on %s)", s.httpServer.Addr)
 
 	var err error
-	cfg := s.Config()
-	scheme := cfg.SbiScheme()
-	if scheme == "http" {
+
+	scheme := s.Config().SbiScheme()
+	switch scheme {
+	case "http":
 		err = s.httpServer.ListenAndServe()
-	} else if scheme == "https" {
+	case "https":
 		// TODO: use config file to config path
-		err = s.httpServer.ListenAndServeTLS(
-			cfg.GetCertPemPath(),
-			cfg.GetCertKeyPath())
-	} else {
+		err = s.httpServer.ListenAndServeTLS(s.Config().GetCertPemPath(), s.Config().GetCertKeyPath())
+	default:
 		err = fmt.Errorf("scheme [%s] is not supported", scheme)
 	}
 
