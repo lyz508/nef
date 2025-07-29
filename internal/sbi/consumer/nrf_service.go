@@ -122,7 +122,7 @@ func (s *nnrfService) RegisterNFInstance(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("context done")
+			return fmt.Errorf("registration cancelled due to context cancellation")
 		default:
 			nf, rsp, err = client.NFInstanceIDDocumentApi.RegisterNFInstance(
 				context.TODO(), s.consumer.Context().NfInstID(), *nfProfile)
