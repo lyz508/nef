@@ -1,14 +1,11 @@
 package consumer
 
 import (
-	"net/http"
-
 	nef_context "github.com/free5gc/nef/internal/context"
 	"github.com/free5gc/nef/internal/logger"
 	"github.com/free5gc/nef/pkg/app"
 	"github.com/free5gc/nef/pkg/factory"
 	"github.com/free5gc/openapi"
-	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/openapi/nrf/NFDiscovery"
 	"github.com/free5gc/openapi/nrf/NFManagement"
 	"github.com/free5gc/openapi/pcf/PolicyAuthorization"
@@ -52,27 +49,6 @@ func NewConsumer(nef nef) (*Consumer, error) {
 		clients:  make(map[string]*DataRepository.APIClient),
 	}
 	return c, nil
-}
-
-func handleAPIServiceResponseError(rsp *http.Response, err error) (int, interface{}) {
-	var rspCode int
-	var rspBody interface{}
-	if rsp.Status != err.Error() {
-		rspCode, rspBody = handleDeserializeError(rsp, err)
-	} else {
-		pd := err.(openapi.GenericOpenAPIError).Model().(models.ProblemDetails)
-		rspCode, rspBody = int(pd.Status), &pd
-	}
-	return rspCode, rspBody
-}
-
-func handleDeserializeError(rsp *http.Response, err error) (int, interface{}) {
-	logger.ConsumerLog.Errorf("Deserialize ProblemDetails Error: %s", err.Error())
-	pd := &models.ProblemDetails{
-		Status: int32(rsp.StatusCode),
-		Detail: err.Error(),
-	}
-	return int(pd.Status), pd
 }
 
 func handleAPIServiceNoResponse(err error) (int, interface{}) {

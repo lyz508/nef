@@ -46,8 +46,13 @@ func (s *npcfService) getPcfPolicyAuthUri() (string, error) {
 			},
 		}
 		logger.ConsumerLog.Infoln(s.consumer.Config().NrfUri())
-		_, sUri, err := s.consumer.SearchNFInstances(s.consumer.Config().NrfUri(), models.ServiceName_NPCF_POLICYAUTHORIZATION,
-			models.NrfNfManagementNfType_PCF, models.NrfNfManagementNfType_NEF, &localVarOptionals)
+		_, sUri, err := s.consumer.SearchNFInstances(
+			s.consumer.Config().NrfUri(),
+			models.ServiceName_NPCF_POLICYAUTHORIZATION,
+			models.NrfNfManagementNfType_PCF,
+			models.NrfNfManagementNfType_NEF,
+			&localVarOptionals,
+		)
 		if err == nil {
 			s.consumer.Context().SetPcfPaUri(sUri)
 		}
@@ -71,7 +76,8 @@ func (s *npcfService) GetAppSession(appSessionId string) (int, interface{}) {
 	}
 	client := s.getClient(uri)
 
-	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NPCF_POLICYAUTHORIZATION, models.NrfNfManagementNfType_PCF)
+	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NPCF_POLICYAUTHORIZATION,
+		models.NrfNfManagementNfType_PCF)
 	if err != nil {
 		return rspCode, rspBody
 	}
@@ -107,7 +113,8 @@ func (s *npcfService) PostAppSessions(asc *models.AppSessionContext) (int, inter
 	}
 	client := s.getClient(uri)
 
-	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NPCF_POLICYAUTHORIZATION, models.NrfNfManagementNfType_PCF)
+	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NPCF_POLICYAUTHORIZATION,
+		models.NrfNfManagementNfType_PCF)
 	if err != nil {
 		return rspCode, rspBody, appSessID
 	}
@@ -152,7 +159,8 @@ func (s *npcfService) PutAppSession(
 	}
 	client := s.getClient(uri)
 
-	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NPCF_POLICYAUTHORIZATION, models.NrfNfManagementNfType_PCF)
+	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NPCF_POLICYAUTHORIZATION,
+		models.NrfNfManagementNfType_PCF)
 	if err != nil {
 		return rspCode, rspBody, appSessionId
 	}
@@ -164,8 +172,6 @@ func (s *npcfService) PutAppSession(
 		GetAppSession(ctx, appSessReq)
 
 	if rsp != nil {
-		rspCode = http.StatusOK
-
 		appSessModReq := &PolicyAuthorization.ModAppSessionRequest{
 			AppSessionId: &appSessionId,
 			AppSessionContextUpdateDataPatch: &models.AppSessionContextUpdateDataPatch{
@@ -210,7 +216,8 @@ func (s *npcfService) PatchAppSession(appSessionId string,
 	}
 	client := s.getClient(uri)
 
-	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NPCF_POLICYAUTHORIZATION, models.NrfNfManagementNfType_PCF)
+	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NPCF_POLICYAUTHORIZATION,
+		models.NrfNfManagementNfType_PCF)
 	if err != nil {
 		return rspCode, rspBody
 	}
@@ -253,7 +260,8 @@ func (s *npcfService) DeleteAppSession(appSessionId string) (int, interface{}) {
 	// 	EventsSubscReqData: optional.NewInterface(models.EventsSubscReqData{}),
 	// }
 
-	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NPCF_POLICYAUTHORIZATION, models.NrfNfManagementNfType_PCF)
+	ctx, _, err := s.consumer.Context().GetTokenCtx(models.ServiceName_NPCF_POLICYAUTHORIZATION,
+		models.NrfNfManagementNfType_PCF)
 	if err != nil {
 		return rspCode, rspBody
 	}
@@ -263,7 +271,6 @@ func (s *npcfService) DeleteAppSession(appSessionId string) (int, interface{}) {
 	}
 	rsp, err = client.IndividualApplicationSessionContextDocumentApi.DeleteAppSession(
 		ctx, appSessDelReq)
-
 	if err != nil {
 		return handleAPIServiceNoResponse(err)
 	}

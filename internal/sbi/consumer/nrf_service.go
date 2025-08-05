@@ -115,7 +115,7 @@ func (s *nnrfService) RegisterNFInstance(ctx context.Context, nefCtx *nef_contex
 	nfInstID := s.consumer.Context().NfInstID()
 	nfProfile, err := s.buildNfProfile()
 	if err != nil {
-		return "", "", fmt.Errorf("Failed to build NRF profile: %+v", err)
+		return "", "", fmt.Errorf("failed to build NRF profile: %+v", err)
 	}
 	client := s.getNFManagementClient(s.consumer.Config().NrfUri())
 
@@ -125,7 +125,7 @@ func (s *nnrfService) RegisterNFInstance(ctx context.Context, nefCtx *nef_contex
 	for !finish {
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("registration cancelled due to context cancellation")
+			return "", "", fmt.Errorf("registration cancelled due to context cancellation")
 		default:
 			req := &NFManagement.RegisterNFInstanceRequest{
 				NfInstanceID:             &nfInstID,
@@ -252,7 +252,9 @@ func (s *nnrfService) SearchNFInstances(nrfUri string, srvName models.ServiceNam
 	return nfProf, uri, nil
 }
 
-func getProfileAndUri(resp *models.SearchResult, srvName models.ServiceName) (*models.NrfNfDiscoveryNfProfile, string, error) {
+func getProfileAndUri(resp *models.SearchResult, srvName models.ServiceName) (
+	*models.NrfNfDiscoveryNfProfile, string, error,
+) {
 	// select the first ServiceName
 	// TODO: select base on other info
 	var profile *models.NrfNfDiscoveryNfProfile

@@ -21,7 +21,7 @@ func (s *AfSubscription) PatchTiSubData(tiSubPatch *models.NefTrafficInfluSubPat
 	s.TiSub.TrafficRoutes = tiSubPatch.TrafficRoutes
 	s.TiSub.TfcCorrInd = tiSubPatch.TfcCorrInd
 	s.TiSub.TempValidities = tiSubPatch.TempValidities
-	s.TiSub.ValidGeoZoneIds = tiSubPatch.ValidGeoZoneIds	// deprecated
+	s.TiSub.ValidGeoZoneIds = tiSubPatch.ValidGeoZoneIds // deprecated
 	s.TiSub.AfAckInd = tiSubPatch.AfAckInd
 	s.TiSub.AddrPreserInd = tiSubPatch.AddrPreserInd
 }

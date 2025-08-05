@@ -136,7 +136,6 @@ func (nc *PfdNotifyContext) FlushNotifications() {
 
 			_, err := nc.notifier.clientPfdManagement.PFDSubscriptionsApi.NnefPFDmanagementNotify(
 				context.TODO(), nc.notifier.getSubURI(id), notifyReq)
-
 			if err != nil {
 				logger.PFDManageLog.Fatal(err)
 			}

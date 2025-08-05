@@ -79,7 +79,6 @@ func (s *nudrService) AppDataInfluenceDataGet(influenceIDs []string) (int, inter
 		InfluenceIds: influenceIDs,
 	}
 	result, err = client.InfluenceDataStoreApi.ReadInfluenceData(ctx, readInfluenceDataReq)
-
 	if err != nil {
 		return handleAPIServiceNoResponse(err)
 	}
@@ -151,7 +150,8 @@ func (s *nudrService) AppDataInfluenceDataPut(influenceID string,
 		TrafficInfluData: tiData,
 	}
 
-	result, err = client.IndividualInfluenceDataDocumentApi.CreateOrReplaceIndividualInfluenceData(ctx, putInfluenceDataReq)
+	result, err = client.IndividualInfluenceDataDocumentApi.CreateOrReplaceIndividualInfluenceData(
+		ctx, putInfluenceDataReq)
 
 	if result != nil {
 		if result.Location != "" {
