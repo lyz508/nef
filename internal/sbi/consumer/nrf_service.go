@@ -125,8 +125,7 @@ func (s *nnrfService) RegisterNFInstance(ctx context.Context, nefCtx *nef_contex
 	for !finish {
 		select {
 		case <-ctx.Done():
-			return "", "", fmt.Errorf("context done.")
-
+			return fmt.Errorf("registration cancelled due to context cancellation")
 		default:
 			req := &NFManagement.RegisterNFInstanceRequest{
 				NfInstanceID:             &nfInstID,
@@ -247,7 +246,7 @@ func (s *nnrfService) SearchNFInstances(nrfUri string, srvName models.ServiceNam
 
 	nfProf, uri, err := getProfileAndUri(result, srvName)
 	if err != nil {
-		logger.ConsumerLog.Errorf(err.Error())
+		logger.ConsumerLog.Errorf("%s", err.Error())
 		return nil, "", err
 	}
 	return nfProf, uri, nil

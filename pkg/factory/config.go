@@ -93,11 +93,11 @@ func (c *Configuration) validate() (bool, error) {
 		}
 	}
 	for i, s := range c.ServiceList {
-		switch {
-		case s.ServiceName == ServiceNefPfd:
-		case s.ServiceName == ServiceNefOam:
+		switch s.ServiceName {
+		case ServiceNefPfd:
+		case ServiceNefOam:
 		default:
-			err := errors.New("Invalid serviceList[" + strconv.Itoa(i) + "]: " +
+			err := errors.New("invalid serviceList[" + strconv.Itoa(i) + "]: " +
 				s.ServiceName + ", should be " + ServiceNefPfd + " or " + ServiceNefOam)
 			return false, appendInvalid(err)
 		}
@@ -153,7 +153,7 @@ func appendInvalid(err error) error {
 	es, ok := err.(govalidator.Errors)
 	if ok {
 		for _, e := range es.Errors() {
-			errs = append(errs, fmt.Errorf("Invalid %w", e))
+			errs = append(errs, fmt.Errorf("invalid %w", e))
 		}
 	} else {
 		errs = append(errs, err)
@@ -337,7 +337,7 @@ func (c *Config) ServiceList() []Service {
 	c.RLock()
 	defer c.RUnlock()
 
-	if c.Configuration.ServiceList != nil && len(c.Configuration.ServiceList) > 0 {
+	if len(c.Configuration.ServiceList) > 0 {
 		return c.Configuration.ServiceList
 	}
 	return nil

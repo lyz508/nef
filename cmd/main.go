@@ -14,7 +14,7 @@ import (
 	nefapp "github.com/free5gc/nef/pkg/service"
 	logger_util "github.com/free5gc/util/logger"
 	"github.com/free5gc/util/version"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func main() {
@@ -30,13 +30,15 @@ func main() {
 	app.Usage = "5G Network Exposure Function (NEF)"
 	app.Action = action
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "config, c",
-			Usage: "Load configuration from `FILE`",
+		&cli.StringFlag{
+			Name:    "config",
+			Aliases: []string{"c"},
+			Usage:   "Load configuration from `FILE`",
 		},
-		cli.StringSliceFlag{
-			Name:  "log, l",
-			Usage: "Output NF log to `FILE`",
+		&cli.StringSliceFlag{
+			Name:    "log",
+			Aliases: []string{"l"},
+			Usage:   "Output NF log to `FILE`",
 		},
 	}
 
